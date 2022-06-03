@@ -3,13 +3,16 @@
     "namespace": "FI_Addresses",
     "type": "record",
     "fields": [
-        {"name": "addrHousenumber", "type": ["string","null"]},
-        {"name": "addrStreet", "type": ["string","null"]},
-        {"name": "addrCity", "type": ["string","null"]},
-        {"name": "fid", "type": "int"},
-        {"name": "source", "type": ["string","null"]},
-        {"name": "addrUnit", "type": ["string","null"]},
-        {"name": "fullAddress", "type": ["string","null"]},
+        {"name": "regione", "type": ["string","null"]},
+        {"name": "nome", "type": ["string","null"]},
+        {"name": "siglaprov", "type": ["string","null"]},
+        {"name": "siglareg", "type": ["string","null"]},
+        {"name": "pk_uid", "type": "int"},
+        {"name": "codistat", "type": ["string","null"]},
+        {"name": "usc07", "type": "int"},
+        {"name": "usc10", "type": "int"},
+        {"name": "usc13", "type": "int"},
+        {"name": "usc16", "type": "int"},
         {"name": "geometry", "type": ["string","null"]}
     ]
 }

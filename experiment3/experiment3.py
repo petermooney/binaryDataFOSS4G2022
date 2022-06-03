@@ -79,32 +79,40 @@ for test in range (0,1):
     clc_fast_avro = []
 
     for index, row in geojson_data.iterrows():
-        #fid =  row["fid"]
-        addrHousenumber = row["addr:housenumber"]
-        addrStreet = row["addr:street"]
-        addrCity = row["addr:city"]
-        source = row["source"]
-        addrUnit = row["addr:unit"]
-        fullAddress = row["fullAddress"]
+
+        pk_uid = row["pk_uid"]
+        regione = row["regione"]
+        nome = row["nome"]
+        siglaprov = row["siglaprov"]
+        siglareg = row["siglareg"]
+        codistat = row["codistat"]
         geometry = row["geometry"]
+        ucs07 = row["ucs07"]  #Codice uso suolo nell’anno 2007
+        ucs10 = row["ucs10"]
+        ucs13 = row["ucs13"]
+        ucs16 = row["ucs16"]
+        ucs19 = row["ucs19"]
 
         tempCLCAvro = {}
-        tempCLCAvro["addrHousenumber"] = addrHousenumber
-        tempCLCAvro["addrStreet"] = addrStreet
-        tempCLCAvro["addrCity"] = addrCity
-        tempCLCAvro["source"] = source
-        tempCLCAvro["addrUnit"] = addrUnit
-        tempCLCsAvro["fullAddress"] = fullAddress
-
+        tempCLCAvro["pk_uid"] = pk_uid
+        tempCLCAvro["regione"] = regione
+        tempCLCAvro["nome"] = nome
+        tempCLCAvro["siglaprov"] = siglaprov
+        tempCLCAvro["siglareg"] = siglareg
+        tempCLCAvro["codistat"] = codistat
+        tempCLCAvro["ucs07"] =  ucs07
+        tempCLCAvro["ucs10"] =  ucs10
+        tempCLCAvro["ucc13"] =  ucs13
+        tempCLCAvro["ucc16"] =  ucs16
+        tempCLCAvro["ucc19"] =  ucs19
 
         tempCLCAvro["geometry"] = geometry.to_wkt()
-        tempCLCAvro["fid"] = 1
 
         clc_fast_avro.append(tempCLCAvro)
 
 
     with open("./binary-output/{}_fast.avro".format(file_name), "wb") as out:
-        writer(out,fast_avro_address_schema,addresses_fast_avro)
+        writer(out,fast_avro_clc_schema,clc_fast_avro)
 
 
     print ("Finished serializing JSON to GeoJSON")
