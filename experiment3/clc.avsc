@@ -8,11 +8,14 @@
         {"name": "siglaprov", "type": ["string","null"]},
         {"name": "siglareg", "type": ["string","null"]},
         {"name": "pk_uid", "type": "int"},
+        {"name": "c3_19"  ,"type": ["string","null"]},
+        {"name": "c2_19" , "type": ["string","null"]},
+
+        {"name": "c1_19" , "type": ["string","null"]},
+
+        {"name": "ucs19" , "type": ["string","null"]},
+
         {"name": "codistat", "type": ["string","null"]},
-        {"name": "usc07", "type": "int"},
-        {"name": "usc10", "type": "int"},
-        {"name": "usc13", "type": "int"},
-        {"name": "usc16", "type": "int"},
         {"name": "geometry", "type": ["string","null"]}
     ]
 }
