@@ -17,12 +17,15 @@ import numpy as np
 getcontext().prec = 16
 file_name = "experiment3"
 avro_schema_file_name = "clc"
-INPUT_GPKG_FILE = './input-data/Firenze_land-use_CLC_WGS_84_SELECTED.gpkg'
-#INPUT_GPKG_FILE = 'test-geopackage.gpkg'
+
+#ROOT = "."
+ROOT = "/home/peter/Downloads/FIRENZE_CLC"
+INPUT_GPKG_FILE = '{}/input-data/Firenze_land-use_CLC_WGS_84_SELECTED_10_features.gpkg'.format(ROOT)
+INPUT_GPKG_FILE = '{}/input-data/Firenze_land-use_CLC_GB-West.gpkg'.format(ROOT)
 #INPUT_GPKG_FILE_LAYER = 'FI_Addresses_Sample_Aug23rd2021'
 
-INPUT_GPKG_FILE_LAYER = 'Firenze_land-use_CLC_WGS_84_SELECTED'
-
+INPUT_GPKG_FILE_LAYER = 'Firenze_land-use_CLC_WGS_84_SELECTED_10_features'
+INPUT_GPKG_FILE_LAYER = 'Firenze_land-use_CLC_GB-West'
 geopkg_geojson_timing = []
 geojson_pbf_timing = []
 geojson_avro_timing = []
@@ -32,97 +35,99 @@ load_geojson_timing = []
 reduce_geojson_timing = []
 load_reduced_geojson_timing = []
 
-for test in range (0,1):
 
-    ## Read the GeoPackage using GeoPandas and convert to GeoJSON file.
+## Read the GeoPackage using GeoPandas and convert to GeoJSON file.
 
-    tic = time.perf_counter()
-    print ("===========GeoPackage to GeoJSON==============")
-    print ("Begin: Converting GeoPackage to GeoJSON...")
+tic = time.perf_counter()
+print ("===========GeoPackage to GeoJSON==============")
+print ("Begin: Converting GeoPackage to GeoJSON...")
 
-    file_size = os.path.getsize(INPUT_GPKG_FILE)
-    print("GeoPackge File size is {} Kb".format(round(file_size/1024),2))
+file_size = os.path.getsize(INPUT_GPKG_FILE)
+print("GeoPackge File size is {} Kb".format(round(file_size/1024),2))
 
-    clc_gdf = gpd.read_file(INPUT_GPKG_FILE, layer=INPUT_GPKG_FILE_LAYER)
-    clc_gdf.to_file("./geojson-output/{}.geojson".format(file_name), driver='GeoJSON')
-    print ("End: Converting GeoPackage to GeoJSON...")
-
+clc_gdf = gpd.read_file(INPUT_GPKG_FILE, layer=INPUT_GPKG_FILE_LAYER)
+clc_gdf.to_file("{}/geojson-output/{}.geojson".format(ROOT,file_name), driver='GeoJSON')
+print ("End: Converting GeoPackage to GeoJSON...")
 
 
-    toc = time.perf_counter()
 
-    geopkg_geojson_timing.append(toc - tic)
-    print(f"Timing: Converting GeoPackage to GeoJSON : {toc - tic:0.4f} seconds")
-    file_size = os.path.getsize("./geojson-output/{}.geojson".format(file_name))
-    print("GeoJSON File size is {} Kb".format(round(file_size/1024),2))
+toc = time.perf_counter()
 
-
-    tic = time.perf_counter()
-    print ("\nBegin: Loading original GeoJSON file for processing...")
-    geojson_data = gpd.read_file("./geojson-output/{}.geojson".format(file_name))
-    ## obtain the CRS of the data from GeoPandas.
-    ## This is important if the CRS is not WGS 84 (EPSG:4326).
-    ## Without the CRS specified, a GIS such as QGIS cannot render the GeoJSON file correctly.
-    data_CRS = geojson_data.crs
-    print ("Data CRS {}".format(data_CRS))
-    toc = time.perf_counter()
-    load_geojson_timing.append(toc - tic)
-    print(f"Timing: Load GeoJSON file (using GeoPandas) : {toc - tic:0.4f} seconds")
-    print ("GeoJSON file: CRS {}".format(geojson_data.crs))
-    print ("GeoJSON file: Total Geometry Objects: {}".format(len(geojson_data['geometry'])))
-    print ("GeoJSON file: Dataset Properties: {}, List: {}".format(len(list(geojson_data)),list(geojson_data)))
-    print ("End: Loading GeoJSON file for processing...")
+geopkg_geojson_timing.append(toc - tic)
+print(f"Timing: Converting GeoPackage to GeoJSON : {toc - tic:0.4f} seconds")
+file_size = os.path.getsize("{}/geojson-output/{}.geojson".format(ROOT,file_name))
+print("GeoJSON File size is {} Kb".format(round(file_size/1024),2))
 
 
-    ###########################################################################
-    ## ATTRIBUTES or Properties
-    ## There is 30 properties in the input file. Let's just select a subset of
-    ## these for processing as many are redundant.
-    print ("========= GeoJSON Reducing Properties ===========")
-    tic = time.perf_counter()
-    print ("\nBegin: Create GeoJSON file with reduced number of properties...")
-    geoJSON_reducedProperties_read = []
-    for index, row in geojson_data.iterrows():
-
-        reducedProperties = {}
-        reducedProperties["pk_uid"] = row["pk_uid"]
-        reducedProperties["regione"] = row["regione"]
-        reducedProperties["nome"] = row["nome"]
-        reducedProperties["siglaprov"] = row["siglaprov"]
-        reducedProperties["siglareg"] = row["siglareg"]
-        reducedProperties["codistat"] = row["codistat"]
-        reducedProperties["ucs19"] = row["ucs19"]
-        reducedProperties["c1_19"] = row["c1_19"]
-        reducedProperties["c2_19"] = row["c2_19"]
-        reducedProperties["c3_19"] = row["c3_19"]
+tic = time.perf_counter()
+print ("\nBegin: Loading original GeoJSON file for processing...")
+geojson_data = gpd.read_file("{}/geojson-output/{}.geojson".format(ROOT,file_name))
+## obtain the CRS of the data from GeoPandas.
+## This is important if the CRS is not WGS 84 (EPSG:4326).
+## Without the CRS specified, a GIS such as QGIS cannot render the GeoJSON file correctly.
+data_CRS = geojson_data.crs
+print ("Data CRS {}".format(data_CRS))
+toc = time.perf_counter()
+load_geojson_timing.append(toc - tic)
+print(f"Timing: Load GeoJSON file (using GeoPandas) : {toc - tic:0.4f} seconds")
+print ("GeoJSON file: CRS {}".format(geojson_data.crs))
+print ("GeoJSON file: Total Geometry Objects: {}".format(len(geojson_data['geometry'])))
+print ("GeoJSON file: Dataset Properties: {}, List: {}".format(len(list(geojson_data)),list(geojson_data)))
+print ("End: Loading GeoJSON file for processing...")
 
 
-        reducedPropertiesGeometry = row["geometry"].to_wkt() #stored as WKT
-        # Convert to a shapely.geometry.polygon.Polygon object
-        g1 = shapely.wkt.loads(reducedPropertiesGeometry)
-        ## create the new feature with just the selected properties.
-        geoJSON_reducedProperties_read.append(Feature(geometry=g1, properties=reducedProperties))
+###########################################################################
+## ATTRIBUTES or Properties
+## There is 30 properties in the input file. Let's just select a subset of
+## these for processing as many are redundant.
+print ("========= GeoJSON Reducing Properties ===========")
+tic = time.perf_counter()
+print ("\nBegin: Create GeoJSON file with reduced number of properties...")
+geoJSON_reducedProperties_read = []
+for index, row in geojson_data.iterrows():
 
-    ## we need to add the information about the CRS to the geojson file.
-    ## if the data is not WSG:84/EPSG:4326 then this needs to be specified.
-    data_crs = {"type": "name","properties": {"name": "{}".format(data_CRS)}}
+    reducedProperties = {}
+    reducedProperties["pk_uid"] = row["pk_uid"]
+    reducedProperties["regione"] = row["regione"]
+    reducedProperties["nome"] = row["nome"]
+    reducedProperties["siglaprov"] = row["siglaprov"]
+    reducedProperties["siglareg"] = row["siglareg"]
+    reducedProperties["codistat"] = row["codistat"]
+    reducedProperties["ucs19"] = row["ucs19"]
+    reducedProperties["c1_19"] = row["c1_19"]
+    reducedProperties["c2_19"] = row["c2_19"]
+    reducedProperties["c3_19"] = row["c3_19"]
 
-    ## create the FeatureCollection now.
-    geoJSON_feature_collection = FeatureCollection(geoJSON_reducedProperties_read,crs=data_crs)
 
-    with open('./geojson-output/{}_propReduced.geojson'.format(file_name), 'w') as f:
-       dump(geoJSON_feature_collection, f)
+    reducedPropertiesGeometry = row["geometry"].to_wkt() #stored as WKT
+    # Convert to a shapely.geometry.polygon.Polygon object
+    g1 = shapely.wkt.loads(reducedPropertiesGeometry)
+    ## create the new feature with just the selected properties.
+    geoJSON_reducedProperties_read.append(Feature(geometry=g1, properties=reducedProperties))
 
-    toc = time.perf_counter()
-    reduce_geojson_timing.append(toc - tic)
-    print(f"Timing: Create reduced properties GeoJSON file (using GeoPandas) : {toc - tic:0.4f} seconds")
-    print(f"Timing Information: Total:\n\tSerialization Process \n\tTotal: {toc - tic:0.4f} seconds")
-    file_size = os.path.getsize("./geojson-output/{}_propReduced.geojson".format(file_name))
-    print("File size is {} Kb".format(round(file_size/1024),2))
+## we need to add the information about the CRS to the geojson file.
+## if the data is not WSG:84/EPSG:4326 then this needs to be specified.
+data_crs = {"type": "name","properties": {"name": "{}".format(data_CRS)}}
+
+## create the FeatureCollection now.
+geoJSON_feature_collection = FeatureCollection(geoJSON_reducedProperties_read,crs=data_crs)
+
+with open('{}/geojson-output/{}_propReduced.geojson'.format(ROOT,file_name), 'w') as f:
+   dump(geoJSON_feature_collection, f)
+
+toc = time.perf_counter()
+reduce_geojson_timing.append(toc - tic)
+print(f"Timing: Create reduced properties GeoJSON file (using GeoPandas) : {toc - tic:0.4f} seconds")
+print(f"Timing Information: Total:\n\tSerialization Process \n\tTotal: {toc - tic:0.4f} seconds")
+file_size = os.path.getsize("{}/geojson-output/{}_propReduced.geojson".format(ROOT,file_name))
+print("File size is {} Kb".format(round(file_size/1024),2))
+
+
+for test in range (0,5):
 
     tic = time.perf_counter()
     print ("\nBegin: Loading reduced GeoJSON file for processing...")
-    geojson_data = gpd.read_file("./geojson-output/{}_propReduced.geojson".format(file_name))
+    geojson_data = gpd.read_file("{}/geojson-output/{}_propReduced.geojson".format(ROOT,file_name))
     ## obtain the CRS of the data from GeoPandas.
     ## This is important if the CRS is not WGS 84 (EPSG:4326).
     ## Without the CRS specified, a GIS such as QGIS cannot render the GeoJSON file correctly.
@@ -205,17 +210,21 @@ for test in range (0,1):
 
         ## these are usually not null.
 
-        temp_polygon.geometry = geometry.to_wkt()
+        #temp_polygon.geometry = geometry.to_wkt()
+        temp_polygon.geometry = str(geometry)
+        #print ("Geometry WKT Str Len {}: ".format(len(geometry.to_wkt())))
+        #print (geometry.to_wkt())
 
-    f = open("./binary-output/{}.pbf".format(file_name), "wb")
+    f = open("{}/binary-output/{}.pbf".format(ROOT,file_name), "wb")
     f.write(polygons_list.SerializeToString())
     f.close()
     print ("Finished creating Protocol Buffer file")
+    print ("Finished Serialize GeoJSON to Protocol Buffer")
     toc = time.perf_counter()
     geojson_pbf_timing.append(toc - tic)
 
     print(f"Timing Information: Total:\n\tSerialization Process \n\tTotal: {toc - tic:0.4f} seconds")
-    file_size = os.path.getsize('./binary-output/{}.pbf'.format(file_name))
+    file_size = os.path.getsize('{}/binary-output/{}.pbf'.format(ROOT,file_name))
     print("File size is {} Kb".format(round(file_size/1024),2))
 
     #################################################################
@@ -228,7 +237,7 @@ for test in range (0,1):
     tic = time.perf_counter()
 
     # Reading data from serialized_file
-    serialized_file= open("./binary-output/{}.pbf".format(file_name), "rb")
+    serialized_file= open("{}/binary-output/{}.pbf".format(ROOT,file_name), "rb")
     experiment3_polygons_read = experiment3_pb2.Experiment3Polygons()
     experiment3_polygons_read.ParseFromString(serialized_file.read())
 
@@ -246,8 +255,8 @@ for test in range (0,1):
         protoBufObj_properties["siglaprov"] = protoBufObj.siglaprov
         protoBufObj_properties["siglareg"] = protoBufObj.siglareg
         protoBufObj_properties["codistat"] = protoBufObj.codistat
-        protoBufObj_properties["geometry"] = protoBufObj.geometry
-        response_properties_geometry = protoBufObj_properties["geometry"] #stored as WKT
+
+        response_properties_geometry = protoBufObj.geometry #stored as WKT
         # Convert to a shapely.geometry.polygon.Polygon object
         g1 = shapely.wkt.loads(response_properties_geometry)
 
@@ -261,27 +270,18 @@ for test in range (0,1):
     ## create the FeatureCollection now.
     geoJSON_feature_collection = FeatureCollection(geoJSON_Features_read,crs=data_crs)
 
-    with open('./geojson-output/{}-pbf.geojson'.format(file_name), 'w') as f:
+    with open('{}/geojson-output/{}-pbf.geojson'.format(ROOT,file_name), 'w') as f:
        dump(geoJSON_feature_collection, f)
 
-    print ("Finished deserialize to Protocol Buffer to GeoJSON")
+    print ("Finished deserialize from Protocol Buffer to GeoJSON")
     toc = time.perf_counter()
 
     print(f"Timing Information: Total:\n\tSerialization Process \n\tTotal: {toc - tic:0.4f} seconds")
     timing_pbf_geojson = toc - tic
     pbf_geojson_timing.append(timing_pbf_geojson)
 
-    file_size = os.path.getsize('./geojson-output/{}-pbf.geojson'.format(file_name))
+    file_size = os.path.getsize('{}/geojson-output/{}-pbf.geojson'.format(ROOT,file_name))
     print("File size is {} Kb".format(round(file_size/1024),2))
-
-
-
-
-
-
-
-
-
 
     ################################################################
     ## fast avro
@@ -320,20 +320,20 @@ for test in range (0,1):
         tempCLCAvro["c2_19"] = row["c2_19"]
         tempCLCAvro["c3_19"] = row["c3_19"]
 
-        tempCLCAvro["geometry"] = geometry.to_wkt()
+        tempCLCAvro["geometry"] = str(geometry)
 
         clc_fast_avro.append(tempCLCAvro)
 
 
-    with open("./binary-output/{}_fast.avro".format(file_name), "wb") as out:
+    with open("{}/binary-output/{}_fast.avro".format(ROOT,file_name), "wb") as out:
         writer(out,fast_avro_clc_schema,clc_fast_avro)
 
 
-    print ("Finished serializing JSON to GeoJSON")
+    print ("Finished serializing from GeoJSON to AVRO")
     toc = time.perf_counter()
     geojson_avro_timing.append(toc - tic)
     print(f"Timing Information: Total:\n\tSerialization Process \n\tTotal: {toc - tic:0.4f} seconds")
-    file_size = os.path.getsize("./binary-output/{}_fast.avro".format(file_name))
+    file_size = os.path.getsize("{}/binary-output/{}_fast.avro".format(ROOT,file_name))
     print("File size is {} Kb".format(round(file_size/1024),2))
 
 
@@ -344,7 +344,7 @@ for test in range (0,1):
 
     tic = time.perf_counter()
     geoJSON_Features_read = []
-    with open('./binary-output/{}_fast.avro'.format(file_name), "rb") as fastavro_fo:
+    with open('{}/binary-output/{}_fast.avro'.format(ROOT,file_name), "rb") as fastavro_fo:
         for t_address in reader(fastavro_fo):
             response_properties = {}
             response_properties["pk_uid"] = t_address["pk_uid"]
@@ -371,15 +371,16 @@ for test in range (0,1):
     ## create the FeatureCollection now.
     geoJSON_feature_collection = FeatureCollection(geoJSON_Features_read,crs=data_crs)
 
-    with open('./geojson-output/{}-avro_fast.geojson'.format(file_name), 'w') as f:
+    with open('{}/geojson-output/{}-avro_fast.geojson'.format(ROOT,file_name), 'w') as f:
        dump(geoJSON_feature_collection, f)
 
 
     toc = time.perf_counter()
     avro_geojson_timing.append(toc - tic)
+    print ("Finished Deserialize Fast Avro to GeoJSON")
 
     print(f"Timing Information: Total:\n\tSerialization Process \n\tTotal: {toc - tic:0.4f} seconds")
-    file_size = os.path.getsize('./geojson-output/{}-avro_fast.geojson'.format(file_name))
+    file_size = os.path.getsize('{}/geojson-output/{}-avro_fast.geojson'.format(ROOT,file_name))
     print("File size is {} Kb".format(round(file_size/1024),2))
 
 
@@ -396,20 +397,26 @@ print ("=====File Sizes=====")
 file_size = os.path.getsize(INPUT_GPKG_FILE)
 print("Input GPKG file size is {} Kb".format(round(file_size/1024),2))
 
-file_size = os.path.getsize('./geojson-output/{}.geojson'.format(file_name))
-print("./geojson-output/{}.geojson size is {} Kb".format(file_name,round(file_size/1024),2))
+file_size = os.path.getsize('{}/geojson-output/{}.geojson'.format(ROOT,file_name))
+print("{}/geojson-output/{}.geojson size is {} Kb".format(ROOT,file_name,round(file_size/1024),2))
 
-file_size = os.path.getsize('./geojson-output/{}_propReduced.geojson'.format(file_name))
-print("./geojson-output/{}.geojson (Properties reduced) size is {} Kb".format(file_name,round(file_size/1024),2))
+file_size = os.path.getsize('{}/geojson-output/{}_propReduced.geojson'.format(ROOT,file_name))
+print("{}/geojson-output/{}_propReduced.geojson (Properties reduced) size is {} Kb".format(ROOT,file_name,round(file_size/1024),2))
 
-file_size = os.path.getsize('./geojson-output/{}-avro_fast.geojson'.format(file_name))
-print("./geojson-output/{}-avro_fast.geojson (Properties reduced) size is {} Kb".format(file_name,round(file_size/1024),2))
+file_size = os.path.getsize('{}/binary-output/{}.pbf'.format(ROOT,file_name))
+print("{}/binary-output/{}.pbf size is {} Kb".format(ROOT,file_name,round(file_size/1024),2))
+file_size = os.path.getsize('{}/binary-output/{}_fast.avro'.format(ROOT,file_name))
+print("{}/binary-output/{}_fast.avro size is {} Kb".format(ROOT,file_name,round(file_size/1024),2))
 
 
-file_size = os.path.getsize('./binary-output/{}.pbf'.format(file_name))
-print("./binary-output/{}.pbf size is {} Kb".format(file_name,round(file_size/1024),2))
-file_size = os.path.getsize('./binary-output/{}_fast.avro'.format(file_name))
-print("./binary-output/{}_fast.avro size is {} Kb".format(file_name,round(file_size/1024),2))
+
+
+file_size = os.path.getsize('{}/geojson-output/{}-avro_fast.geojson'.format(ROOT,file_name))
+print("{}/geojson-output/{}-avro_fast.geojson (Properties reduced) size is {} Kb".format(ROOT,file_name,round(file_size/1024),2))
+
+file_size = os.path.getsize('{}/geojson-output/{}-pbf.geojson'.format(ROOT,file_name))
+print("{}/geojson-output/{}-pbf.geojson (Properties reduced) size is {} Kb".format(ROOT,file_name,round(file_size/1024),2))
+
 
 
 print ("=====Run Times=====")
